@@ -18,7 +18,7 @@
 #subtitle {
   font-family: 'Quicksand', sans-serif;
   color: #676767;
-  font-size: 3vh;
+  font-size: 140%;
   font-weight: 700;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .info-item-icon {
-  width: 8vh;
+  width: 5vh;
   margin-bottom: 5%;
 }
 

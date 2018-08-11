@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './Home.css';
 
 const logo = require('../assets/imgs/bom logo.png');
@@ -13,7 +14,7 @@ const Home = () => {
         <div className="title-container">
           <img src={ logo } alt="bandsonmap logo" id="logo"/>
           <h2 id="subtitle"><strong>Your artists, one map.</strong></h2>
-          <button type="button" id="go-button" className="btn btn-light">GO</button>
+          <NavLink to="/map" id="go-link"><button type="button" id="go-button" className="btn btn-light">GO</button></NavLink>
         </div>
       </div>
       <div className="row justify-content-center info-container">
