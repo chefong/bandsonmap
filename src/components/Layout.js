@@ -9,7 +9,7 @@ import './Layout.css';
 
 library.add(faSearch, faHome);
 
-const musicIcon = require('../assets/imgs/music-player.png');
+const dot = require('../assets/imgs/dot.png');
 const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
 
@@ -108,7 +108,7 @@ class Layout extends Component {
             { this.state.events && this.state.events.map(artistEvent => {
               return (
                 <Marker coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]} key={artistEvent.id}>
-                  <img src={ musicIcon } alt=""/>
+                  <img src={ dot } alt="" className="dot-marker"/>
                 </Marker>
               )}) 
             }
