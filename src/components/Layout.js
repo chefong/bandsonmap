@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import ReactMapboxGl from "react-mapbox-gl";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import './Layout.css';
+import { faSearch, faHome } from '@fortawesome/free-solid-svg-icons';
 import { library } from '../../node_modules/@fortawesome/fontawesome-svg-core';
+import { NavLink } from 'react-router-dom';
+import './Layout.css';
 
-library.add(faSearch);
+library.add(faSearch, faHome);
 
 const Map = ReactMapboxGl({
   accessToken: process.env.REACT_APP_MAPBOX_TOKEN
@@ -37,6 +38,13 @@ class Layout extends Component {
           <div className="form-container">
             <form onSubmit={ this.handleSubmit }>
               <div class="input-group">
+                <span class="input-group-prepend">
+                  <NavLink to="/" id="home-link">
+                    <button class="btn btn-outline-secondary border" id="home-button" type="button">
+                      <FontAwesomeIcon icon="home" size="sm" id="home"/>
+                    </button>
+                  </NavLink>
+                </span>
                 <input class="form-control py-2 border-right-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
                 <span class="input-group-append">
                   <button class="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">

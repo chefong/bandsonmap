@@ -15,16 +15,21 @@
   width: 100%;
 }
 
-.form-control:focus, #search-button:focus {
+.form-control:focus, #search-button:focus, #home-button:focus {
   outline: 0 !important;
   border-color: initial;
   box-shadow: none;
 }
 
-#magnifying-glass {
+#magnifying-glass, #home-button {
   color: #676767;
 }
 
-#search-button {
+#search-button, #home-button {
   background-color: white;
+}
+
+#home-button {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
 }
