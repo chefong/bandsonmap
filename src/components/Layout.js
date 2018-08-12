@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
-import ReactMapboxGl, { Marker } from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faHome } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
-import Marks from './Marks';
 import './Layout.css';
 
 library.add(faSearch, faHome);
 
-const dot = require('../assets/imgs/dot.png');
 const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
 
@@ -39,10 +37,13 @@ class Layout extends Component {
   handleSubmit = async e => {
     e.preventDefault();
 
+    // Make sure states are cleared (except center) during each new search
     this.resetState();
-
+    
     let artistName = e.target.elements.searchbox.value;
-    let eventList = [];
+    if (!artistName) {
+      return;
+    }
 
     // Fetch artist data
     const artist_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}?app_id=${bandsintownID}`);
@@ -55,6 +56,7 @@ class Layout extends Component {
     })
 
     // Fetch artist event data
+    let eventList = [];
     const artistEvent_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}/events?app_id=${bandsintownID}`);
     const artistEventData = await artistEvent_API_CALL.json();
     console.log(artistEventData);
@@ -64,7 +66,16 @@ class Layout extends Component {
     this.setState({events: eventList});
   }
 
-  componentWillMount = () => {
+  getCoordinates = () => {
+    let coordinatesList = [];
+    for (let i = 0; i < this.state.events.length; ++i) {
+      coordinatesList.push([this.state.events[i].venue.longitude, this.state.events[i].venue.latitude]);
+    }
+    console.log(coordinatesList);
+    return coordinatesList;
+  }
+
+  componentDidMount = () => {
     navigator.geolocation.getCurrentPosition(location => {
       this.setState({
         center: [location.coords.longitude, location.coords.latitude]
@@ -77,7 +88,7 @@ class Layout extends Component {
       <div className="wrapper">
         <div className="row justify-content-center">
           <div className="form-container">
-            <form onSubmit={ this.handleSubmit }>
+            <form onSubmit={this.handleSubmit}>
               <div className="input-group">
                 <span className="input-group-prepend">
                   <NavLink to="/" id="home-link">
@@ -103,15 +114,19 @@ class Layout extends Component {
             containerStyle={{
               height: "100vh",
               width: "100vw"
-            }}
-          >
-            { this.state.events && this.state.events.map(artistEvent => {
-              return (
-                <Marker coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]} key={artistEvent.id}>
-                  <img src={ dot } alt="" className="dot-marker"/>
-                </Marker>
-              )}) 
-            }
+            }}>
+            { this.state.events && (
+              <Layer
+                type="symbol" 
+                id="marker"
+                layout={{
+                    "icon-image": "circle-15"
+                  }}>
+                { this.state.events.map(artistEvent => {
+                  return <Feature key={artistEvent.id} coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]}/>
+                })}
+              </Layer>
+            )}
           </Mapbox>
         </div>
       </div>
