@@ -19,10 +19,12 @@ class Layout extends Component {
 
   state = {
     center: [-122.431297, 37.773972], // [longitude, latitude] of SF (default)
+    zoom: [11],
     name: undefined,
     id: undefined,
     imageURL: undefined, 
-    events: undefined
+    events: undefined,
+    timeOfDay: undefined
   }
 
   resetState = () => {
@@ -63,24 +65,29 @@ class Layout extends Component {
     for (let i = 0; i < artistEventData.length; ++i) {
       eventList.push(artistEventData[i]);
     }
-    this.setState({events: eventList});
+
+    // Store all events in state and zoom out to see all venue locations
+    this.setState({
+      events: eventList,
+      zoom: [0]
+    });
   }
 
-  getCoordinates = () => {
-    let coordinatesList = [];
-    for (let i = 0; i < this.state.events.length; ++i) {
-      coordinatesList.push([this.state.events[i].venue.longitude, this.state.events[i].venue.latitude]);
-    }
-    console.log(coordinatesList);
-    return coordinatesList;
+  displayModal = (long, lat) => {
+    // Center and zoom into the event location
+    this.setState({
+      center: [long, lat],
+      zoom: [15]
+    })
   }
 
   componentDidMount = () => {
-    navigator.geolocation.getCurrentPosition(location => {
-      this.setState({
-        center: [location.coords.longitude, location.coords.latitude]
-      })
-    });
+    // Ask user permission for browser location when after component mounts
+    // navigator.geolocation.getCurrentPosition(location => {
+    //   this.setState({
+    //     center: [location.coords.longitude, location.coords.latitude]
+    //   })
+    // });
   }
 
   render() {
@@ -110,6 +117,7 @@ class Layout extends Component {
         <div className="map-container">
           <Mapbox
             style="mapbox://styles/ericong18/cjkhgo9ti2o5z2so5c0s0gng8"
+            zoom={this.state.zoom}
             center={this.state.center}
             containerStyle={{
               height: "100vh",
@@ -123,7 +131,12 @@ class Layout extends Component {
                     "icon-image": "circle-15"
                   }}>
                 { this.state.events.map(artistEvent => {
-                  return <Feature key={artistEvent.id} coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]}/>
+                  return (
+                    <Feature
+                      key={artistEvent.id}
+                      coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]}
+                      onClick={() => {this.displayModal(artistEvent.venue.longitude, artistEvent.venue.latitude)}}/>
+                  )  
                 })}
               </Layer>
             )}
