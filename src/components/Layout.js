@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faHome } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
+import Modal from 'react-responsive-modal';
+import './CustomModal.css';
 import './Layout.css';
 
 library.add(faSearch, faHome);
@@ -24,7 +26,7 @@ class Layout extends Component {
     id: undefined,
     imageURL: undefined, 
     events: undefined,
-    timeOfDay: undefined
+    modalOpen: false
   }
 
   resetState = () => {
@@ -73,11 +75,19 @@ class Layout extends Component {
     });
   }
 
-  displayModal = (long, lat) => {
+  openModal = (long, lat) => {
     // Center and zoom into the event location
     this.setState({
       center: [long, lat],
-      zoom: [15]
+      zoom: [15],
+      modalOpen: true
+    })
+    console.log("Open modal");
+  }
+
+  closeModal = () => {
+    this.setState({
+      modalOpen: false
     })
   }
 
@@ -91,6 +101,7 @@ class Layout extends Component {
   }
 
   render() {
+    const open = this.state.modalOpen;
     return (
       <div className="wrapper">
         <div className="row justify-content-center">
@@ -114,6 +125,18 @@ class Layout extends Component {
             </form>
           </div>
         </div>
+        <div className="modal-container">
+          <Modal open={open} onClose={this.closeModal} showCloseIcon={false} classNames={{ modal: 'custom-modal', overlay: 'custom-overlay' }}center>
+              <div className="row">
+                <div className="col-md-6">
+                  <img src={this.state.imageURL} alt="" className="image-modal"/>
+                </div>
+                <div className="col-md-6">
+                  <p id="artist-name">{this.state.name}</p>
+                </div>
+              </div>
+          </Modal>
+        </div>
         <div className="map-container">
           <Mapbox
             style="mapbox://styles/ericong18/cjkhgo9ti2o5z2so5c0s0gng8"
@@ -135,7 +158,7 @@ class Layout extends Component {
                     <Feature
                       key={artistEvent.id}
                       coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]}
-                      onClick={() => {this.displayModal(artistEvent.venue.longitude, artistEvent.venue.latitude)}}/>
+                      onClick={() => {this.openModal(artistEvent.venue.longitude, artistEvent.venue.latitude)}}/>
                   )  
                 })}
               </Layer>
