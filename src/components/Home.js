@@ -23,7 +23,7 @@ const Home = () => {
           <div className="icon-container">
             <img src={ searchIcon } alt="Search Icon" className="info-item-icon"/>
           </div>
-          <p className="item-desc">Type in your favorite artist and see where they’ll be visiting on the map. The data you see is all powered by <a className="link" href="https://www.bandsintown.com/" target="_blank" rel="noopener noreferrer">bandsintown!</a></p>
+          <p className="item-desc">Type in your favorite artist and see where they’ll be visiting soon. The data you see is all provided by <a className="link" href="https://www.bandsintown.com/" target="_blank" rel="noopener noreferrer">bandsintown!</a></p>
         </div>
         <div className="col-md-4">
           <p className="info-item">Interact</p>
