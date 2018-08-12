@@ -1,0 +1,30 @@
+.wrapper {
+  position: relative;
+}
+
+.form-container {
+  margin-top: 2%;
+  text-align: center;
+  position: absolute;
+  z-index: 99;
+}
+
+.form-control {
+  font-family: 'Quicksand', sans-serif;
+  color: #676767;
+  width: 100%;
+}
+
+.form-control:focus, #search-button:focus {
+  outline: 0 !important;
+  border-color: initial;
+  box-shadow: none;
+}
+
+#magnifying-glass {
+  color: #676767;
+}
+
+#search-button {
+  background-color: white;
+}
