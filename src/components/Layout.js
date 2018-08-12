@@ -54,9 +54,8 @@ class Layout extends Component {
             containerStyle={{
               height: "100vh",
               width: "100vw"
-            }}>
-            <h1>hello</h1>
-          </Map>
+            }}
+          />
         </div>
       </div>
     );
