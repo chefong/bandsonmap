@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
+import ReactMapboxGl, { Layer, Feature, ZoomControl, RotationControl, ScaleControl } from "react-mapbox-gl";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
@@ -9,7 +9,7 @@ import Modal from 'react-responsive-modal';
 import './CustomModal.css';
 import './Layout.css';
 
-library.add(faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, fab);
+library.add(faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes, fab);
 
 const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
@@ -110,9 +110,9 @@ class Layout extends Component {
   constructTime = () => {
     if (this.state.currentEvent) {
       let eventTime = new Date(this.state.currentEvent.datetime);
-      let hours = eventTime.getUTCHours();
+      let hours = eventTime.getHours();
       console.log(hours);
-      let minutes = eventTime.getUTCMinutes();
+      let minutes = eventTime.getMinutes();
 
       if (minutes < 10) {
         minutes = '0' + minutes;
@@ -182,6 +182,9 @@ class Layout extends Component {
               height: "100vh",
               width: "100vw"
             }}>
+            <ScaleControl style={{ bottom: 30 }}/>
+            <ZoomControl />
+            <RotationControl style={{ top: 80 }} />
             { this.state.events && (
               <Layer
                 type="symbol" 
@@ -231,14 +234,17 @@ class Layout extends Component {
                         {this.state.currentEvent && <p className="venue-location">{this.getVenueLocation()}</p>}
                       </div>
                     </div>
+                    <div className="row justify-content-center modal-link-container">
+                      <div className="col-md-3 col-3">
+                        {this.state.currentEvent && <a href={this.state.currentEvent.url} target="_blank" className="modal-link"><FontAwesomeIcon icon="ticket-alt" size="2x" className="modal-icon ticket-icon"/></a>}
+                      </div>
+                      <div className="col-md-3 col-3">
+                        {this.state.facebookURL && <a href={this.state.facebookURL} target="_blank" className="modal-link"><FontAwesomeIcon icon={['fab', 'facebook']} size="2x" className="modal-icon facebook-icon"/></a>}
+                      </div>
+                    </div>
                   </div>
-                  <div className="row justify-content-center modal-link-container">
-                    <div className="col-md-3 col-3">
-                      {this.state.currentEvent && <a href={this.state.currentEvent.url} target="_blank" className="modal-link"><FontAwesomeIcon icon="ticket-alt" size="2x" className="modal-icon"/></a>}
-                    </div>
-                    <div className="col-md-3 col-3">
-                      {this.state.facebookURL && <a href={this.state.facebookURL} target="_blank" className="modal-link"><FontAwesomeIcon icon={['fab', 'facebook']} size="2x" className="modal-icon"/></a>}
-                    </div>
+                  <div className="row justify-content-center close-button-container">
+                    <button type="button" className="btn btn-primary" id="close-button" onClick={this.closeModal}><FontAwesomeIcon icon="times" size="sm" className="close-icon"/> Close</button>
                   </div>
                 </div>
               </div>

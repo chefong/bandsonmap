@@ -2,3 +2,7 @@
   margin: none;
   background-color: #E9E9E9;
 }
+
+.custom-overlay {
+  background-color: rgba(0, 0, 0, 0.2);
+}
