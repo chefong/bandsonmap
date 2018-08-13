@@ -34,7 +34,8 @@ class Layout extends Component {
     currentEvent: undefined,
     modalOpen: false,
     empty: false,
-    error: false
+    error: false,
+    loading: false
   }
 
   resetState = () => {
@@ -144,8 +145,9 @@ class Layout extends Component {
       }
       else {
         ampm = 'PM';
-        (hours >= 13 && !isMobile) ?
-          hours -= 12 : hours -= 5;
+        if (hours >= 13) {
+          hours -= 12;
+        }
       }
 
       return (hours + ':' + minutes + ' ' + ampm);
@@ -155,7 +157,13 @@ class Layout extends Component {
   getVenueLocation = () => {
     if (this.state.currentEvent) {
       let venue = this.state.currentEvent.venue;
-      return (venue.city + ', ' + venue.region + ', ' + venue.country);
+      let city = venue.city + ', ';
+
+      let region = venue.region;
+      region ?
+        region += ', ' : region = '';
+
+      return (city + region + venue.country);
     }
   }
 
