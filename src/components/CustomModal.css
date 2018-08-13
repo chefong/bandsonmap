@@ -1,7 +1,4 @@
 .custom-modal {
   margin: none;
-}
-
-.custom-overlay {
-  border-radius: 20px;
+  background-color: #E9E9E9;
 }

@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
 import Modal from 'react-responsive-modal';
 import './CustomModal.css';
 import './Layout.css';
 
-library.add(faSearch, faHome);
+library.add(faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, fab);
 
 const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const Mapbox = ReactMapboxGl({
   accessToken: mapBoxToken
@@ -24,8 +27,10 @@ class Layout extends Component {
     zoom: [11],
     name: undefined,
     id: undefined,
-    imageURL: undefined, 
+    imageURL: undefined,
+    facebookURL: undefined,
     events: undefined,
+    currentEvent: undefined,
     modalOpen: false
   }
 
@@ -40,9 +45,6 @@ class Layout extends Component {
 
   handleSubmit = async e => {
     e.preventDefault();
-
-    // Make sure states are cleared (except center) during each new search
-    this.resetState();
     
     let artistName = e.target.elements.searchbox.value;
     if (!artistName) {
@@ -56,7 +58,8 @@ class Layout extends Component {
     this.setState({
       name: artistData.name,
       id: artistData.id,
-      imageURL: artistData.image_url
+      imageURL: artistData.image_url,
+      facebookURL: artistData.facebook_page_url
     })
 
     // Fetch artist event data
@@ -75,20 +78,64 @@ class Layout extends Component {
     });
   }
 
-  openModal = (long, lat) => {
-    // Center and zoom into the event location
+  openModal = (long, lat, currentEvent) => {
+    // Center and zoom into the event location and assign active event
     this.setState({
       center: [long, lat],
       zoom: [15],
+      currentEvent,
       modalOpen: true
     })
-    console.log("Open modal");
   }
 
   closeModal = () => {
     this.setState({
       modalOpen: false
     })
+  }
+
+  constructDate = () => {
+    if (this.state.currentEvent) {
+      let eventTime = new Date(this.state.currentEvent.datetime);
+
+      let dayOfWeek = days[eventTime.getDay()];
+      let month = months[eventTime.getMonth()];
+      let date = eventTime.getDate();
+      let year = eventTime.getFullYear();
+
+      return (dayOfWeek + ', ' + month + ' ' + date + ', ' + year);
+    }
+  }
+
+  constructTime = () => {
+    if (this.state.currentEvent) {
+      let eventTime = new Date(this.state.currentEvent.datetime);
+      let hours = eventTime.getUTCHours();
+      console.log(hours);
+      let minutes = eventTime.getUTCMinutes();
+
+      if (minutes < 10) {
+        minutes = '0' + minutes;
+      }
+
+      let ampm;
+      if (hours < 12) {
+        ampm = 'AM';
+      }
+      else {
+        ampm = 'PM';
+        hours -= 12;
+      }
+
+      return (hours + ':' + minutes + ' ' + ampm);
+    }
+  }
+
+  getVenueLocation = () => {
+    if (this.state.currentEvent) {
+      let venue = this.state.currentEvent.venue;
+      return (venue.city + ', ' + venue.region + ', ' + venue.country);
+    }
   }
 
   componentDidMount = () => {
@@ -125,21 +172,10 @@ class Layout extends Component {
             </form>
           </div>
         </div>
-        <div className="modal-container">
-          <Modal open={open} onClose={this.closeModal} showCloseIcon={false} classNames={{ modal: 'custom-modal', overlay: 'custom-overlay' }}center>
-              <div className="row">
-                <div className="col-md-6">
-                  <img src={this.state.imageURL} alt="" className="image-modal"/>
-                </div>
-                <div className="col-md-6">
-                  <p id="artist-name">{this.state.name}</p>
-                </div>
-              </div>
-          </Modal>
-        </div>
         <div className="map-container">
           <Mapbox
-            style="mapbox://styles/ericong18/cjkhgo9ti2o5z2so5c0s0gng8"
+            // eslint-disable-next-line
+            style="mapbox://styles/ericong18/cjkrdhft55uy52tmt3562gjqe"
             zoom={this.state.zoom}
             center={this.state.center}
             containerStyle={{
@@ -151,6 +187,7 @@ class Layout extends Component {
                 type="symbol" 
                 id="marker"
                 layout={{
+                    "icon-allow-overlap": true,
                     "icon-image": "circle-15"
                   }}>
                 { this.state.events.map(artistEvent => {
@@ -158,12 +195,54 @@ class Layout extends Component {
                     <Feature
                       key={artistEvent.id}
                       coordinates={[artistEvent.venue.longitude, artistEvent.venue.latitude]}
-                      onClick={() => {this.openModal(artistEvent.venue.longitude, artistEvent.venue.latitude)}}/>
+                      onClick={() => {this.openModal(artistEvent.venue.longitude, artistEvent.venue.latitude, artistEvent)}}/>
                   )  
                 })}
               </Layer>
             )}
           </Mapbox>
+        </div>
+        <div className="modal-container">
+          <Modal open={open} onClose={this.closeModal} showCloseIcon={false} classNames={{ modal: 'custom-modal', overlay: 'custom-overlay' }}center>
+              <div className="row">
+                <div className="col-md-6 image-modal-container">
+                  <img src={this.state.imageURL} alt="" className="image-modal"/>
+                </div>
+                <div className="col-md-6">
+                  <div className="row justify-content-center">
+                    <p id="artist-name">{this.state.name}</p>
+                  </div>
+                  <div className="box">
+                    <div className="row justify-content-center">
+                      <div className="col-md-3 col-sm-3 col-3 event-icon-container">
+                        <FontAwesomeIcon icon="clock" size="lg" className="event-icon"/>
+                      </div>
+                      <div className="col-md-9 col-sm-9 col-9 event-container">
+                        <p className="event-date">{this.constructDate()} </p>
+                        {this.state.currentEvent && <p className="event-time">{this.constructTime()} </p>}
+                      </div>
+                    </div>
+                    <div className="row justify-content-center">
+                      <div className="col-md-3 col-sm-3 col-3 event-icon-container">
+                        <FontAwesomeIcon icon="map-marker-alt" size="lg" className="event-icon"/>
+                      </div>
+                      <div className="col-md-9 col-sm-9 col-9 event-container">
+                        {this.state.currentEvent && <p className="venue-name">{this.state.currentEvent.venue.name}</p>}
+                        {this.state.currentEvent && <p className="venue-location">{this.getVenueLocation()}</p>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row justify-content-center modal-link-container">
+                    <div className="col-md-3 col-3">
+                      {this.state.currentEvent && <a href={this.state.currentEvent.url} target="_blank" className="modal-link"><FontAwesomeIcon icon="ticket-alt" size="2x" className="modal-icon"/></a>}
+                    </div>
+                    <div className="col-md-3 col-3">
+                      {this.state.facebookURL && <a href={this.state.facebookURL} target="_blank" className="modal-link"><FontAwesomeIcon icon={['fab', 'facebook']} size="2x" className="modal-icon"/></a>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </Modal>
         </div>
       </div>
     );
