@@ -1,3 +1,3 @@
 # bandsonmap
 
-See where all your favorite artists are coming on an interactive map.
+See where all your favorite artists plan on performing an interactive map.
