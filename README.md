@@ -1,3 +1,3 @@
 # bandsonmap
 
-See all your favorite artist events from bandsintown on an interactive map.
+See where all your favorite artists are coming on an interactive map.
