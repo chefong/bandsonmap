@@ -192,7 +192,7 @@ class Layout extends Component {
                       </button>
                     </NavLink>
                   </span>
-                  <input className="form-control py-2 border-right-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
+                  <input className="form-control py-2 border-right-0 border-left-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
                   <span className="input-group-append">
                     <button className="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">
                       <FontAwesomeIcon icon="search" size="sm" id="magnifying-glass"/>
