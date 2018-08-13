@@ -12,6 +12,7 @@
     "mapbox-gl": "^0.47.0",
     "npm": "^6.3.0",
     "react": "^16.4.2",
+    "react-device-detect": "^1.5.9",
     "react-dom": "^16.4.2",
     "react-map-gl": "^3.3.4",
     "react-mapbox-gl": "^3.8.0",

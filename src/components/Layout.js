@@ -5,6 +5,7 @@ import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes } from 
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
+import { isMobile } from 'react-device-detect';
 import Modal from 'react-responsive-modal';
 import './CustomModal.css';
 import './Layout.css';
@@ -31,7 +32,10 @@ class Layout extends Component {
     facebookURL: undefined,
     events: undefined,
     currentEvent: undefined,
-    modalOpen: false
+    modalOpen: false,
+    empty: false,
+    error: false,
+    loading: false
   }
 
   resetState = () => {
@@ -48,25 +52,43 @@ class Layout extends Component {
     
     let artistName = e.target.elements.searchbox.value;
     if (!artistName) {
+      this.setState({
+        empty: true,
+        error: false
+      })
       return;
     }
+    this.setState({
+      empty: false
+    })
 
-    // Fetch artist data
-    const artist_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}?app_id=${bandsintownID}`);
-    const artistData = await artist_API_CALL.json();
-    console.log(artistData);
+    // Fetch artist and event data
+    let eventList = [];
+    let artist_API_CALL, artistData, artistEvent_API_CALL, artistEventData;
+    try {
+      artist_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}?app_id=${bandsintownID}`);
+      artistData = await artist_API_CALL.json();
+
+      artistEvent_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}/events?app_id=${bandsintownID}`);
+      artistEventData = await artistEvent_API_CALL.json();
+      console.log(artistEventData);
+    }
+    catch(err) {
+      console.log(err);
+      this.setState({
+        error: true
+      })
+      return;
+    }
+    
     this.setState({
       name: artistData.name,
       id: artistData.id,
       imageURL: artistData.image_url,
-      facebookURL: artistData.facebook_page_url
+      facebookURL: artistData.facebook_page_url,
+      error: false
     })
 
-    // Fetch artist event data
-    let eventList = [];
-    const artistEvent_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}/events?app_id=${bandsintownID}`);
-    const artistEventData = await artistEvent_API_CALL.json();
-    console.log(artistEventData);
     for (let i = 0; i < artistEventData.length; ++i) {
       eventList.push(artistEventData[i]);
     }
@@ -111,7 +133,6 @@ class Layout extends Component {
     if (this.state.currentEvent) {
       let eventTime = new Date(this.state.currentEvent.datetime);
       let hours = eventTime.getHours();
-      console.log(hours);
       let minutes = eventTime.getMinutes();
 
       if (minutes < 10) {
@@ -124,7 +145,9 @@ class Layout extends Component {
       }
       else {
         ampm = 'PM';
-        hours -= 12;
+        if (hours >= 13) {
+          hours -= 12;
+        }
       }
 
       return (hours + ':' + minutes + ' ' + ampm);
@@ -134,7 +157,13 @@ class Layout extends Component {
   getVenueLocation = () => {
     if (this.state.currentEvent) {
       let venue = this.state.currentEvent.venue;
-      return (venue.city + ', ' + venue.region + ', ' + venue.country);
+      let city = venue.city + ', ';
+
+      let region = venue.region;
+      region ?
+        region += ', ' : region = '';
+
+      return (city + region + venue.country);
     }
   }
 
@@ -153,23 +182,29 @@ class Layout extends Component {
       <div className="wrapper">
         <div className="row justify-content-center">
           <div className="form-container">
-            <form onSubmit={this.handleSubmit}>
-              <div className="input-group">
-                <span className="input-group-prepend">
-                  <NavLink to="/" id="home-link">
-                    <button className="btn btn-outline-secondary border" id="home-button" type="button">
-                      <FontAwesomeIcon icon="home" size="sm" id="home"/>
+            <div className="form-bar-container">
+              <form onSubmit={this.handleSubmit}>
+                <div className="input-group">
+                  <span className="input-group-prepend">
+                    <NavLink to="/" id="home-link">
+                      <button className="btn btn-outline-secondary border" id="home-button" type="button">
+                        <FontAwesomeIcon icon="home" size="sm" id="home"/>
+                      </button>
+                    </NavLink>
+                  </span>
+                  <input className="form-control py-2 border-right-0 border-left-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
+                  <span className="input-group-append">
+                    <button className="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">
+                      <FontAwesomeIcon icon="search" size="sm" id="magnifying-glass"/>
                     </button>
-                  </NavLink>
-                </span>
-                <input className="form-control py-2 border-right-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
-                <span className="input-group-append">
-                  <button className="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">
-                    <FontAwesomeIcon icon="search" size="sm" id="magnifying-glass"/>
-                  </button>
-                </span>
-              </div>
-            </form>
+                  </span>
+                </div>
+              </form>
+            </div>
+            <div className="error-warning-container row justify-content-center">
+              { this.state.empty && <div className="alert alert-warning" role="alert">Oops! You forgot to enter something.</div> }
+              { this.state.error && <div className="alert alert-danger" role="alert">Sorry, your information was invalid.</div> }
+            </div>
           </div>
         </div>
         <div className="map-container">
