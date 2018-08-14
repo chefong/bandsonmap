@@ -5,7 +5,6 @@ import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes } from 
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { NavLink } from 'react-router-dom';
-import { isMobile } from 'react-device-detect';
 import Modal from 'react-responsive-modal';
 import './CustomModal.css';
 import './Layout.css';
@@ -16,6 +15,7 @@ const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const spinner = require('../assets/imgs/three-dots.svg');
 
 const Mapbox = ReactMapboxGl({
   accessToken: mapBoxToken
@@ -25,7 +25,7 @@ class Layout extends Component {
 
   state = {
     center: [-122.431297, 37.773972], // [longitude, latitude] of SF (default)
-    zoom: [11],
+    zoom: [0],
     name: undefined,
     id: undefined,
     imageURL: undefined,
@@ -35,7 +35,8 @@ class Layout extends Component {
     modalOpen: false,
     empty: false,
     error: false,
-    loading: false
+    loading: false,
+    none: false
   }
 
   resetState = () => {
@@ -65,18 +66,30 @@ class Layout extends Component {
     // Fetch artist and event data
     let eventList = [];
     let artist_API_CALL, artistData, artistEvent_API_CALL, artistEventData;
+    this.setState({
+      loading: true
+    })
     try {
       artist_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}?app_id=${bandsintownID}`);
       artistData = await artist_API_CALL.json();
 
       artistEvent_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}/events?app_id=${bandsintownID}`);
       artistEventData = await artistEvent_API_CALL.json();
+
+      if (artistEventData.length === 0) {
+        this.setState({
+          none: true,
+          loading: false
+        })
+        return;
+      }
       console.log(artistEventData);
     }
     catch(err) {
       console.log(err);
       this.setState({
-        error: true
+        error: true,
+        loading: false
       })
       return;
     }
@@ -86,7 +99,9 @@ class Layout extends Component {
       id: artistData.id,
       imageURL: artistData.image_url,
       facebookURL: artistData.facebook_page_url,
-      error: false
+      error: false,
+      loading: false,
+      none: false
     })
 
     for (let i = 0; i < artistEventData.length; ++i) {
@@ -96,7 +111,7 @@ class Layout extends Component {
     // Store all events in state and zoom out to see all venue locations
     this.setState({
       events: eventList,
-      zoom: [0]
+      zoom: [1]
     });
   }
 
@@ -168,12 +183,23 @@ class Layout extends Component {
   }
 
   componentDidMount = () => {
-    // Ask user permission for browser location when after component mounts
-    // navigator.geolocation.getCurrentPosition(location => {
-    //   this.setState({
-    //     center: [location.coords.longitude, location.coords.latitude]
-    //   })
-    // });
+    this.setState({
+      name: JSON.parse(localStorage.getItem("name")),
+      id: JSON.parse(localStorage.getItem("id")),
+      imageURL: JSON.parse(localStorage.getItem("imageURL")),
+      facebookURL: JSON.parse(localStorage.getItem("facebookURL")),
+      events: JSON.parse(localStorage.getItem("events")),
+      currentEvent: JSON.parse(localStorage.getItem("currentEvent")),
+    })
+  }
+
+  componentDidUpdate = () => {
+    localStorage.setItem("name", JSON.stringify(this.state.name));
+    localStorage.setItem("id", JSON.stringify(this.state.id));
+    localStorage.setItem("imageURL", JSON.stringify(this.state.imageURL));
+    localStorage.setItem("facebookURL", JSON.stringify(this.state.facebookURL));
+    localStorage.setItem("events", JSON.stringify(this.state.events));
+    localStorage.setItem("currentEvent", JSON.stringify(this.state.currentEvent));
   }
 
   render() {
@@ -201,9 +227,12 @@ class Layout extends Component {
                 </div>
               </form>
             </div>
-            <div className="error-warning-container row justify-content-center">
+            <div className="message-container row justify-content-center">
               { this.state.empty && <div className="alert alert-warning" role="alert">Oops! You forgot to enter something.</div> }
               { this.state.error && <div className="alert alert-danger" role="alert">Sorry, your information was invalid.</div> }
+              { this.state.none && <div className="alert alert-secondary" role="alert">It seems like we don't have any information for your artist :(</div> }
+              <br/>
+              { this.state.loading && <img src={spinner} alt="Loading" id="loading-spinner"/> }
             </div>
           </div>
         </div>
@@ -225,8 +254,7 @@ class Layout extends Component {
                 type="symbol" 
                 id="marker"
                 layout={{
-                    "icon-allow-overlap": true,
-                    "icon-image": "circle-15"
+                    "icon-image": "music-round-15"
                   }}>
                 { this.state.events.map(artistEvent => {
                   return (
@@ -244,7 +272,7 @@ class Layout extends Component {
           <Modal open={open} onClose={this.closeModal} showCloseIcon={false} classNames={{ modal: 'custom-modal', overlay: 'custom-overlay' }}center>
               <div className="row">
                 <div className="col-md-6 image-modal-container">
-                  <img src={this.state.imageURL} alt="" className="image-modal"/>
+                  <img src={this.state.imageURL} alt={this.state.name + ' image'} className="image-modal"/>
                 </div>
                 <div className="col-md-6">
                   <div className="row justify-content-center">

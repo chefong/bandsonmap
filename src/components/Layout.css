@@ -18,6 +18,10 @@
   border-radius: 25px;
 }
 
+#loading-spinner {
+  margin-top: 4%;
+}
+
 .form-bar-container {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   opacity: 0.95;
@@ -56,10 +60,6 @@
   border-bottom-left-radius: 0px;
 }
 
-.dot-marker {
-  width: 10%;
-}
-
 .image-modal {
   width: 100%;
   border-radius: 25px;
@@ -67,7 +67,8 @@
 
 .image-modal-container {
   text-align: center;
-  display:table-cell; vertical-align:middle;
+  display: table-cell; 
+  vertical-align: middle;
 }
 
 #artist-name {

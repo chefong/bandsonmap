@@ -37,7 +37,7 @@ const Home = () => {
           <div className="icon-container">
             <img src={ supportIcon } alt="Support Icon" className="info-item-icon"/>
           </div>
-          <p className="item-desc">Like what you see? Share it with your friends and give it a star on our <a className="link" href="https://github.com/ericong18/bandsonmap" target="_blank" rel="noopener noreferrer">GitHub repo!</a></p>
+          <p className="item-desc">Like what you see? Share it with your friends and give it a star on the <a className="link" href="https://github.com/ericong18/bandsonmap" target="_blank" rel="noopener noreferrer">GitHub repo!</a></p>
         </div>
       </div>
     </div>
