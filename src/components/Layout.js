@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import ReactMapboxGl, { Layer, Feature, ZoomControl, RotationControl, ScaleControl } from "react-mapbox-gl";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Form from './Form';
+import Message from './Message';
+import Content from './Content';
 import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { NavLink } from 'react-router-dom';
 import Modal from 'react-responsive-modal';
 import './CustomModal.css';
 import './Layout.css';
@@ -15,7 +16,6 @@ const mapBoxToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const bandsintownID = process.env.REACT_APP_BANDSINTOWN_ID;
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const spinner = require('../assets/imgs/three-dots.svg');
 
 const Mapbox = ReactMapboxGl({
   accessToken: mapBoxToken
@@ -25,7 +25,7 @@ class Layout extends Component {
 
   state = {
     center: [98.5795, 39.8283], // [longitude, latitude] of SF (default)
-    zoom: [0],
+    zoom: [1],
     name: undefined,
     id: undefined,
     imageURL: undefined,
@@ -39,19 +39,11 @@ class Layout extends Component {
     none: false
   }
 
-  resetState = () => {
-    this.setState({
-      name: undefined,
-      id: undefined,
-      imageURL: undefined,
-      events: undefined
-    })
-  }
-
   handleSubmit = async e => {
     e.preventDefault();
-    
     let artistName = e.target.elements.searchbox.value;
+
+    // Check if input is empty
     if (!artistName) {
       this.setState({
         empty: true,
@@ -63,7 +55,7 @@ class Layout extends Component {
       empty: false
     })
 
-    // Fetch artist and event data
+    // Fetch artist and event data and handle errors
     let eventList = [];
     let artist_API_CALL, artistData, artistEvent_API_CALL, artistEventData;
     this.setState({
@@ -76,6 +68,7 @@ class Layout extends Component {
       artistEvent_API_CALL = await fetch(`https://rest.bandsintown.com/artists/${artistName}/events?app_id=${bandsintownID}`);
       artistEventData = await artistEvent_API_CALL.json();
 
+      // Check if artist event information doesn't exist
       if (artistEventData.length === 0) {
         this.setState({
           none: true,
@@ -83,7 +76,6 @@ class Layout extends Component {
         })
         return;
       }
-      console.log(artistEventData);
     }
     catch(err) {
       console.log(err);
@@ -93,26 +85,23 @@ class Layout extends Component {
       })
       return;
     }
+
+    // Store all events in an array
+    for (let i = 0; i < artistEventData.length; ++i) {
+      eventList.push(artistEventData[i]);
+    }
     
     this.setState({
       name: artistData.name,
       id: artistData.id,
+      events: eventList,
+      zoom: [1],
       imageURL: artistData.image_url,
       facebookURL: artistData.facebook_page_url,
       error: false,
       loading: false,
       none: false
     })
-
-    for (let i = 0; i < artistEventData.length; ++i) {
-      eventList.push(artistEventData[i]);
-    }
-
-    // Store all events in state and zoom out to see all venue locations
-    this.setState({
-      events: eventList,
-      zoom: [1]
-    });
   }
 
   openModal = (long, lat, currentEvent) => {
@@ -172,7 +161,7 @@ class Layout extends Component {
     }
   }
 
-  getVenueLocation = () => {
+  parseLocation = () => {
     if (this.state.currentEvent) {
       let venue = this.state.currentEvent.venue;
       let city = venue.city + ', ';
@@ -192,7 +181,7 @@ class Layout extends Component {
       imageURL: JSON.parse(localStorage.getItem("imageURL")),
       facebookURL: JSON.parse(localStorage.getItem("facebookURL")),
       events: JSON.parse(localStorage.getItem("events")),
-      currentEvent: JSON.parse(localStorage.getItem("currentEvent")),
+      currentEvent: JSON.parse(localStorage.getItem("currentEvent"))
     })
   }
 
@@ -211,31 +200,9 @@ class Layout extends Component {
       <div className="wrapper">
         <div className="row justify-content-center">
           <div className="form-container">
-            <div className="form-bar-container">
-              <form onSubmit={this.handleSubmit}>
-                <div className="input-group">
-                  <span className="input-group-prepend">
-                    <NavLink to="/" id="home-link">
-                      <button className="btn btn-outline-secondary border" id="home-button" type="button">
-                        <FontAwesomeIcon icon="home" size="sm" id="home"/>
-                      </button>
-                    </NavLink>
-                  </span>
-                  <input className="form-control py-2 border-right-0 border-left-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" autoComplete="off" size="50"/>
-                  <span className="input-group-append">
-                    <button className="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">
-                      <FontAwesomeIcon icon="search" size="sm" id="magnifying-glass"/>
-                    </button>
-                  </span>
-                </div>
-              </form>
-            </div>
+            <Form submit={this.handleSubmit}/>
             <div className="message-container row justify-content-center">
-              { this.state.empty && <div className="alert alert-warning" role="alert">Oops! You forgot to enter something.</div> }
-              { this.state.error && <div className="alert alert-danger" role="alert">Sorry, your information was invalid.</div> }
-              { this.state.none && <div className="alert alert-secondary" role="alert">It seems like we don't have any event information for your artist :(</div> }
-              <br/>
-              { this.state.loading && <img src={spinner} alt="Loading" id="loading-spinner"/> }
+              <Message empty={this.state.empty} error={this.state.error} none={this.state.none} loading={this.state.loading}/>
             </div>
           </div>
         </div>
@@ -276,47 +243,15 @@ class Layout extends Component {
         </div>
         <div className="modal-container">
           <Modal open={open} onClose={this.closeModal} showCloseIcon={false} classNames={{ modal: 'custom-modal', overlay: 'custom-overlay' }}center>
-              <div className="row">
-                <div className="col-md-6 image-modal-container">
-                  <img src={this.state.imageURL} alt={this.state.name + ' image'} className="image-modal"/>
-                </div>
-                <div className="col-md-6">
-                  <div className="row justify-content-center">
-                    <p id="artist-name">{this.state.name}</p>
-                  </div>
-                  <div className="box">
-                    <div className="row justify-content-center">
-                      <div className="col-md-3 col-sm-3 col-3 event-icon-container">
-                        <FontAwesomeIcon icon="clock" size="lg" className="event-icon"/>
-                      </div>
-                      <div className="col-md-9 col-sm-9 col-9 event-container">
-                        <p className="event-date">{this.constructDate()} </p>
-                        {this.state.currentEvent && <p className="event-time">{this.constructTime()} </p>}
-                      </div>
-                    </div>
-                    <div className="row justify-content-center">
-                      <div className="col-md-3 col-sm-3 col-3 event-icon-container">
-                        <FontAwesomeIcon icon="map-marker-alt" size="lg" className="event-icon"/>
-                      </div>
-                      <div className="col-md-9 col-sm-9 col-9 event-container">
-                        {this.state.currentEvent && <p className="venue-name">{this.state.currentEvent.venue.name}</p>}
-                        {this.state.currentEvent && <p className="venue-location">{this.getVenueLocation()}</p>}
-                      </div>
-                    </div>
-                    <div className="row justify-content-center modal-link-container">
-                      <div className="col-md-3 col-3">
-                        {this.state.currentEvent && <a href={this.state.currentEvent.url} target="_blank" className="modal-link"><FontAwesomeIcon icon="ticket-alt" size="2x" className="modal-icon ticket-icon"/></a>}
-                      </div>
-                      <div className="col-md-3 col-3">
-                        {this.state.facebookURL && <a href={this.state.facebookURL} target="_blank" className="modal-link"><FontAwesomeIcon icon={['fab', 'facebook']} size="2x" className="modal-icon facebook-icon"/></a>}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row justify-content-center close-button-container">
-                    <button type="button" className="btn btn-primary" id="close-button" onClick={this.closeModal}><FontAwesomeIcon icon="times" size="sm" className="close-icon"/> Close</button>
-                  </div>
-                </div>
-              </div>
+            <Content
+              imageURL={this.state.imageURL}
+              name={this.state.name}
+              currentEvent={this.state.currentEvent}
+              date={this.constructDate()}
+              time={this.constructTime()}
+              location={this.parseLocation()}
+              facebookURL={this.state.facebookURL}
+              close={this.closeModal}/>
           </Modal>
         </div>
       </div>
