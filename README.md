@@ -8,6 +8,6 @@ Enter an artist name and watch the map populate with the different event locatio
 
 ![Example search](./src/assets/imgs/example1.gif)
 
-Click on the ticket icon to visit Bandsintown event link where you can buy tickets or click on the Facebook icon to connect with the artist.
+Click on the ticket icon to visit the Bandsintown event link where you can buy tickets or click on the Facebook icon to connect with the artist!
 
 ![Modal](./src/assets/imgs/modal1.png)
