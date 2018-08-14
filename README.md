@@ -1,6 +1,6 @@
 # bandsonmap
 
-See where all your favorite artists plan on performing on an interactive map! Visit https://bandsonmap.firebaseapp.com/.
+Bandsonmap is an interactive web application that lets you see where your favorite artists plan on performing by using Mapbox's GL JS API and Bandsintown's API. Visit https://bandsonmap.firebaseapp.com/ to start.
 
 ![Bandsonmap logo](./src/assets/imgs/bom&#32;logo.png)
 
