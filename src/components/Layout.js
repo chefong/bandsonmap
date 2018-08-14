@@ -24,7 +24,7 @@ const Mapbox = ReactMapboxGl({
 class Layout extends Component {
 
   state = {
-    center: [-122.431297, 37.773972], // [longitude, latitude] of SF (default)
+    center: [98.5795, 39.8283], // [longitude, latitude] of SF (default)
     zoom: [0],
     name: undefined,
     id: undefined,
@@ -218,7 +218,7 @@ class Layout extends Component {
                       </button>
                     </NavLink>
                   </span>
-                  <input className="form-control py-2 border-right-0 border-left-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" size="50"/>
+                  <input className="form-control py-2 border-right-0 border-left-0 border col-md-12" name="searchbox" placeholder="Search for an artist" type="search" id="example-search-input" autoComplete="off" size="50"/>
                   <span className="input-group-append">
                     <button className="btn btn-outline-secondary border-left-0 border" id="search-button" type="submit">
                       <FontAwesomeIcon icon="search" size="sm" id="magnifying-glass"/>
@@ -230,7 +230,7 @@ class Layout extends Component {
             <div className="message-container row justify-content-center">
               { this.state.empty && <div className="alert alert-warning" role="alert">Oops! You forgot to enter something.</div> }
               { this.state.error && <div className="alert alert-danger" role="alert">Sorry, your information was invalid.</div> }
-              { this.state.none && <div className="alert alert-secondary" role="alert">It seems like we don't have any information for your artist :(</div> }
+              { this.state.none && <div className="alert alert-secondary" role="alert">It seems like we don't have any event information for your artist :(</div> }
               <br/>
               { this.state.loading && <img src={spinner} alt="Loading" id="loading-spinner"/> }
             </div>
@@ -240,6 +240,9 @@ class Layout extends Component {
           <Mapbox
             // eslint-disable-next-line
             style="mapbox://styles/ericong18/cjkrdhft55uy52tmt3562gjqe"
+            animationOptions={{
+              duration: "6000"
+            }}
             zoom={this.state.zoom}
             center={this.state.center}
             containerStyle={{
