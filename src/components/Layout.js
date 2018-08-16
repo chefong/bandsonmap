@@ -52,7 +52,9 @@ class Layout extends Component {
       return;
     }
     this.setState({
-      empty: false
+      error: false,
+      empty: false,
+      none: false
     })
 
     // Fetch artist and event data and handle errors
