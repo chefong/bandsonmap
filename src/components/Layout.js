@@ -3,6 +3,7 @@ import ReactMapboxGl, { Layer, Feature, ZoomControl, RotationControl, ScaleContr
 import Form from './Form';
 import Message from './Message';
 import Content from './Content';
+import Current from './Current';
 import { faSearch, faHome, faTicketAlt, faClock, faMapMarkerAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -33,6 +34,7 @@ class Layout extends Component {
     events: undefined,
     currentEvent: undefined,
     modalOpen: false,
+    result: false,
     empty: false,
     error: false,
     loading: false,
@@ -47,7 +49,8 @@ class Layout extends Component {
     if (!artistName) {
       this.setState({
         empty: true,
-        error: false
+        error: false,
+        result: false
       })
       return;
     }
@@ -74,7 +77,8 @@ class Layout extends Component {
       if (artistEventData.length === 0) {
         this.setState({
           none: true,
-          loading: false
+          loading: false,
+          result: false
         })
         return;
       }
@@ -83,7 +87,8 @@ class Layout extends Component {
       console.log(err);
       this.setState({
         error: true,
-        loading: false
+        loading: false,
+        result: false
       })
       return;
     }
@@ -100,6 +105,7 @@ class Layout extends Component {
       zoom: [1],
       imageURL: artistData.image_url,
       facebookURL: artistData.facebook_page_url,
+      result: true,
       error: false,
       loading: false,
       none: false
@@ -183,7 +189,8 @@ class Layout extends Component {
       imageURL: JSON.parse(localStorage.getItem("imageURL")),
       facebookURL: JSON.parse(localStorage.getItem("facebookURL")),
       events: JSON.parse(localStorage.getItem("events")),
-      currentEvent: JSON.parse(localStorage.getItem("currentEvent"))
+      currentEvent: JSON.parse(localStorage.getItem("currentEvent")),
+      result: JSON.parse(localStorage.getItem("result"))
     })
   }
 
@@ -194,6 +201,7 @@ class Layout extends Component {
     localStorage.setItem("facebookURL", JSON.stringify(this.state.facebookURL));
     localStorage.setItem("events", JSON.stringify(this.state.events));
     localStorage.setItem("currentEvent", JSON.stringify(this.state.currentEvent));
+    localStorage.setItem("result", JSON.stringify(this.state.result));
   }
 
   render() {
@@ -204,7 +212,14 @@ class Layout extends Component {
           <div className="form-container">
             <Form submit={this.handleSubmit}/>
             <div className="message-container row justify-content-center">
-              <Message empty={this.state.empty} error={this.state.error} none={this.state.none} loading={this.state.loading}/>
+              <Message 
+                empty={this.state.empty} 
+                error={this.state.error} 
+                none={this.state.none} 
+                loading={this.state.loading}/>
+            </div>
+            <div className="current-container">
+              {this.state.result && <Current name={this.state.name}/>}
             </div>
           </div>
         </div>
