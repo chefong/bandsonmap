@@ -2,12 +2,14 @@
 .image-modal {
   width: 100%;
   border-radius: 25px;
+  margin: auto;
+  display: block;
 }
 
 .image-modal-container {
-  text-align: center;
-  display: table-cell; 
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 #artist-name {

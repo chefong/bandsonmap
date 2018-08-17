@@ -6,7 +6,7 @@ const Content = props => {
   return (
     <div className="row">
       <div className="col-md-6 image-modal-container">
-        <img src={props.imageURL} alt={props.name + ' image'} className="image-modal"/>
+        <img src={props.imageURL} alt={props.name + ' image'} className="image-modal mx-auto align-middle"/>
       </div>
       <div className="col-md-6">
         <div className="row justify-content-center">
