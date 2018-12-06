@@ -143,29 +143,15 @@ class Layout extends Component {
 
   constructTime = () => {
     if (this.state.currentEvent) {
-      let eventTime = new Date(this.state.currentEvent.datetime);
-      let hours = eventTime.getHours();
-      let minutes = eventTime.getMinutes();
+      let eventTime = new Date(this.state.currentEvent.datetime)
+      let hours = eventTime.getUTCHours();
+      let minutes = eventTime.getUTCMinutes();
 
       if (minutes < 10) {
         minutes = '0' + minutes;
       }
 
-      let ampm;
-      if (hours < 12) {
-        if (hours === 0) {
-          hours = 12;
-        }
-        ampm = 'AM';
-      }
-      else {
-        ampm = 'PM';
-        if (hours >= 13) {
-          hours -= 12;
-        }
-      }
-
-      return (hours + ':' + minutes + ' ' + ampm);
+      return (hours + ':' + minutes + " UTC");
     }
   }
 
